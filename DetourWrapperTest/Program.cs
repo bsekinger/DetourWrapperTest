@@ -3,22 +3,49 @@
 
 using System;
 using System.Runtime.InteropServices;
-using DetourWrapper; // Include the namespace from the DLL
+
+public class DetourWrapper
+{
+    const string DllPath = @"D:\My Documents\Repos\DetourWrapper\x64\Debug\DetourWrapper.dll";
+
+    [DllImport(DllPath, CallingConvention = CallingConvention.Cdecl)]
+    public static unsafe extern void* allocDetour();
+
+    [DllImport(DllPath, CallingConvention = CallingConvention.Cdecl)]
+    public static unsafe extern void freeDetour(void* detourPtr);
+
+    [DllImport(DllPath, CallingConvention = CallingConvention.Cdecl)]
+    public static unsafe extern uint load(void* detourPtr, [MarshalAs(UnmanagedType.LPStr)] string filePath);
+
+    // Add future functions...
+}
 
 class Program
 {
-    unsafe static void Main(string[] args)
+    static void Main()
     {
-        string filePath = "D:\\My Documents\\Repos\\DetourWrapperTest\\DetourWrapperTest\\Meshes\\87.bin";
-        void* ptr = null;
-
-        // Call the LoadMesh function from the C++/CLI assembly
-        ptr = MeshLoader.LoadMesh(filePath);
-
-        if (ptr != null)
+        unsafe
         {
-            // Call the FreeMesh functiom from the C++/CLI assembly
-            MeshLoader.FreeMesh(ptr);
+            void* detourPtr = DetourWrapper.allocDetour();
+            if (detourPtr != null)
+            {
+                string filePath = @"D:\My Documents\Repos\DetourWrapperTest\DetourWrapperTest\Meshes\87.bin";
+                uint result = DetourWrapper.load(detourPtr, filePath);
+                if (result != 0)
+                {
+                    Console.WriteLine("Load successful!");
+                }
+                else
+                {
+                    Console.WriteLine("Load failed!");
+                }
+
+                DetourWrapper.freeDetour(detourPtr);
+            }
+            else
+            {
+                Console.WriteLine("Detour allocation failed!");
+            }
         }
     }
 }
