@@ -20,10 +20,6 @@ public unsafe partial class DetourWrapper
     public static partial uint load(void* detourPtr, [MarshalAs(UnmanagedType.LPStr)] string filePath);
 
     // Add future functions...
-}
-
-class Program
-{
     static unsafe void Main()
     {
         void* detourPtr = DetourWrapper.allocDetour();
