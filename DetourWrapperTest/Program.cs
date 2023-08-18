@@ -33,9 +33,17 @@ public unsafe partial class DetourWrapper
     {
         Vector3 startPt = new Vector3(4821.74f, 57.6562f, 17139.2f);
         Vector3 endPt = new Vector3(4339.0127f, 57.65735f, 17687.316f);
-        Vector3 start = new Vector3(4339.0127f, 57.65735f, 17687.316f);
-        Vector3 target = new Vector3(4349.0127f, 57.65735f, 17687.316f);
-        float range = 20.0f;
+        Vector3 WallStart = new Vector3(4412.0195f, 59.477183f, 17394.703f);
+        Vector3 WallTarget = new Vector3(4414.3f, 58.2188f, 17341.8f);
+        Vector3 WallTarget2 = new Vector3(4409.1f, 57.6562f, 17423.6f);
+        Vector3 treeStart = new Vector3(4409.3916f, 57.65735f, 17508.252f);
+        Vector3 treeTarget = new Vector3(4408.38f, 57.6562f, 17493.3f);
+        Vector3 rockStart = new Vector3(4455.538f, 57.65735f, 17429.459f);
+        Vector3 rockTarget = new Vector3(4463.85f, 57.6562f, 17402.4f);
+        Vector3 rockTarget2 = new Vector3(4473.99f, 57.6562f, 17441f);
+
+
+        float range = 60.0f;
 
         void* detourPtr = DetourWrapper.allocDetour();
         if (detourPtr == null)
@@ -56,13 +64,28 @@ public unsafe partial class DetourWrapper
             {
                 Console.WriteLine("Load successful!");
 
-                uint los = DetourWrapper.check_los(detourPtr, &start, &target, &range);
+                uint los = DetourWrapper.check_los(detourPtr, &rockStart, &rockTarget, &range);
+                if (los == 0)
+                {
+                    Console.WriteLine("Invalid point!");
+                }
+
                 if (los == 1)
-                    Console.WriteLine("Out of Range!");
+                {
+                    Console.WriteLine("Out of range!");
+                }
+
                 if (los == 2)
-                    Console.WriteLine("los Failed!");
+                {
+                    Console.WriteLine("LoS Failed!");
+                }
+
                 if (los == 5)
-                    Console.WriteLine("los Success!");
+                {
+                    Console.WriteLine("LoS Success!");
+                }
+
+
 
                 float[] strPathArray = new float[768];
                 fixed (float* strPathPtr = strPathArray)
