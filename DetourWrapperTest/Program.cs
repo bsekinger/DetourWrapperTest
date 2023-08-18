@@ -24,12 +24,19 @@ public unsafe partial class DetourWrapper
     //[DllImport(DllPath, CallingConvention = CallingConvention.Cdecl)]
     public static partial uint find_path(void* ptr, void* start, void* end, void* strPath);
 
+    [LibraryImport(DllPath), UnmanagedCallConv]
+    //[DllImport(DllPath, CallingConvention = CallingConvention.Cdecl)]
+    public static partial uint check_los(void* ptr, void* start, void* end, void* range);
+
     // Add future functions...
     static unsafe void Main()
     {
         Vector3 startPt = new Vector3(4821.74f, 57.6562f, 17139.2f);
         Vector3 endPt = new Vector3(4339.0127f, 57.65735f, 17687.316f);
-        
+        Vector3 start = new Vector3(4339.0127f, 57.65735f, 17687.316f);
+        Vector3 target = new Vector3(4349.0127f, 57.65735f, 17687.316f);
+        float range = 20.0f;
+
         void* detourPtr = DetourWrapper.allocDetour();
         if (detourPtr == null)
         {
@@ -48,6 +55,14 @@ public unsafe partial class DetourWrapper
             else
             {
                 Console.WriteLine("Load successful!");
+
+                uint los = DetourWrapper.check_los(detourPtr, &start, &target, &range);
+                if (los == 1)
+                    Console.WriteLine("Out of Range!");
+                if (los == 2)
+                    Console.WriteLine("los Failed!");
+                if (los == 5)
+                    Console.WriteLine("los Success!");
 
                 float[] strPathArray = new float[768];
                 fixed (float* strPathPtr = strPathArray)
