@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Drawing;
 using System.Numerics;
 using System.Runtime.InteropServices;
 
@@ -9,23 +10,21 @@ public unsafe partial class DetourWrapper
 {
     const string DllPath = @"D:\My Documents\Repos\DetourWrapper\x64\Debug\DetourWrapper.dll";
     [LibraryImport(DllPath), UnmanagedCallConv]
-    //[DllImport(DllPath, CallingConvention = CallingConvention.Cdecl)]
     public static partial void* allocDetour();
 
     [LibraryImport(DllPath), UnmanagedCallConv]
-    //[DllImport(DllPath, CallingConvention = CallingConvention.Cdecl)]
     public static partial void freeDetour(void* detourPtr);
 
     [LibraryImport(DllPath), UnmanagedCallConv]
-    //[DllImport(DllPath, CallingConvention = CallingConvention.Cdecl)]
-    public static partial uint load(void* detourPtr, [MarshalAs(UnmanagedType.LPStr)] string filePath);
+     public static partial uint load(void* detourPtr, [MarshalAs(UnmanagedType.LPStr)] string filePath);
 
     [LibraryImport(DllPath), UnmanagedCallConv]
-    //[DllImport(DllPath, CallingConvention = CallingConvention.Cdecl)]
     public static partial uint find_path(void* ptr, void* start, void* end, void* strPath);
 
     [LibraryImport(DllPath), UnmanagedCallConv]
-    //[DllImport(DllPath, CallingConvention = CallingConvention.Cdecl)]
+    public static partial uint random_roam(void* ptr, void* start, void* strPath);
+
+    [LibraryImport(DllPath), UnmanagedCallConv]
     public static partial uint check_los(void* ptr, void* start, void* end, void* range);
 
     // Add future functions...
@@ -64,7 +63,7 @@ public unsafe partial class DetourWrapper
             {
                 Console.WriteLine("Load successful!");
 
-                uint los = DetourWrapper.check_los(detourPtr, &rockStart, &rockTarget, &range);
+                uint los = DetourWrapper.check_los(detourPtr, &rockStart, &rockTarget2, &range);
                 if (los == 0)
                 {
                     Console.WriteLine("Invalid point!");
@@ -86,9 +85,9 @@ public unsafe partial class DetourWrapper
                 }
 
 
-
-                float[] strPathArray = new float[768];
+                Span<float> strPathArray = stackalloc float[768];                
                 fixed (float* strPathPtr = strPathArray)
+                    
                 {
                     uint pathCount = DetourWrapper.find_path(detourPtr, &startPt, &endPt, strPathPtr);
 
@@ -98,6 +97,33 @@ public unsafe partial class DetourWrapper
                         for (int i = 0; i < pathCount * 3; i += 3)
                         {
                             Vector3 point = new Vector3(strPathArray[i], strPathArray[i + 1], strPathArray[i + 2]);
+                            pathPoints.Add(point);
+                        }
+
+                        foreach (Vector3 point in pathPoints)
+                        {
+                            Console.WriteLine("Point: X=" + point.X + " Y=" + point.Y + " Z=" + point.Z);
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("No path found.");
+                    }
+                }
+
+                Span<float> strPathArray2 = stackalloc float[768];
+                fixed (float* strPathPtr = strPathArray2)
+
+                {
+                    uint pathCount = DetourWrapper.random_roam(detourPtr, &startPt, strPathPtr);
+
+                    if (pathCount > 0)
+                    {
+                        Console.WriteLine("Random Roam Path found!");
+                        List<Vector3> pathPoints = new List<Vector3>();
+                        for (int i = 0; i < pathCount * 3; i += 3)
+                        {
+                            Vector3 point = new Vector3(strPathArray2[i], strPathArray2[i + 1], strPathArray2[i + 2]);
                             pathPoints.Add(point);
                         }
 
