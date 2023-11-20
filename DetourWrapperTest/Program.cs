@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 public unsafe partial class DetourWrapper
 {
-    const string DllPath = @"D:\My Documents\Repos\DetourWrapper\x64\Debug\DetourWrapper.dll";
+    const string DllPath = @"C:\Users\bseki\source\repos\DetourWrapper\x64\Debug\DetourWrapper.dll";
     [LibraryImport(DllPath), UnmanagedCallConv]
     public static partial void* allocDetour();
 
@@ -52,7 +52,7 @@ public unsafe partial class DetourWrapper
         }
         else
         {
-            string filePath = @"D:\My Documents\Repos\DetourWrapperTest\DetourWrapperTest\Meshes\87.bin";
+            string filePath = @"C:\Users\bseki\source\repos\DetourWrapperTest\DetourWrapperTest\Meshes\87.bin";
             uint result = DetourWrapper.load(detourPtr, filePath);
             if (result == 0)
             {
