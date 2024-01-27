@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 public unsafe partial class DetourWrapper
 {
-    const string DllPath = @"C:\Users\bseki\source\repos\DetourWrapper\x64\Debug\DetourWrapper.dll";
+    const string DllPath = @"C:\Users\bseki\source\repos\DetourWrapper\x64\Release\DetourWrapper.dll";
     [LibraryImport(DllPath), UnmanagedCallConv]
     public static partial void* allocDetour();
 
@@ -27,6 +27,9 @@ public unsafe partial class DetourWrapper
     [LibraryImport(DllPath), UnmanagedCallConv]
     public static partial uint check_los(void* ptr, void* start, void* end, void* range);
 
+    [LibraryImport(DllPath), UnmanagedCallConv]
+    public static partial uint random_point(void* ptr, void* center, float radius, void* rndPoint);
+
     // Add future functions...
     static unsafe void Main()
     {
@@ -40,6 +43,9 @@ public unsafe partial class DetourWrapper
         Vector3 rockStart = new Vector3(4455.538f, 57.65735f, 17429.459f);
         Vector3 rockTarget = new Vector3(4463.85f, 57.6562f, 17402.4f);
         Vector3 rockTarget2 = new Vector3(4473.99f, 57.6562f, 17441f);
+        Vector3 centerPoint = new Vector3(4473.99f, 57.6562f, 17441f);
+        float radius = 20.0f;
+        Vector3 rndPoint;
 
 
         float range = 60.0f;
@@ -135,6 +141,28 @@ public unsafe partial class DetourWrapper
                     else
                     {
                         Console.WriteLine("No path found.");
+                    }
+                }
+
+                Span<float> rndPointArray = stackalloc float[3];
+                int numberOfRandomPoints = 10;
+
+                for (int i = 0; i < numberOfRandomPoints; i++)
+                {
+                    fixed (float* rndPointPtr = rndPointArray)
+                    {
+                        uint pointFound = DetourWrapper.random_point(detourPtr, (float*)&centerPoint, radius, rndPointPtr);
+
+                        if (pointFound > 0)
+                        {
+                            Console.WriteLine($"Random Point {i + 1} found!");
+                            Vector3 randomPoint = new Vector3(rndPointArray[0], rndPointArray[1], rndPointArray[2]);
+                            Console.WriteLine($"Random Point {i + 1}: X={randomPoint.X} Y={randomPoint.Y} Z={randomPoint.Z}");
+                        }
+                        else
+                        {
+                            Console.WriteLine($"No random point found for iteration {i + 1}.");
+                        }
                     }
                 }
             }
