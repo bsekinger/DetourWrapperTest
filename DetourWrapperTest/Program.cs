@@ -22,7 +22,7 @@ public unsafe partial class DetourWrapper
     public static partial uint find_path(void* ptr, void* start, void* end, void* strPath);
 
     [LibraryImport(DllPath), UnmanagedCallConv]
-    public static partial uint random_roam(void* ptr, void* start, void* strPath);
+    public static partial uint find_smoothPath(void* ptr, void* start, void* end, void* smoothPath);
 
     [LibraryImport(DllPath), UnmanagedCallConv]
     public static partial uint check_los(void* ptr, void* start, void* end, void* range);
@@ -33,8 +33,8 @@ public unsafe partial class DetourWrapper
     // Add future functions...
     static unsafe void Main()
     {
-        Vector3 startPt = new Vector3(4821.74f, 57.6562f, 17139.2f);
-        Vector3 endPt = new Vector3(4339.0127f, 57.65735f, 17687.316f);
+        Vector3 startPt = new Vector3(4461.11f, 57.6562f, 17562.6f);
+        Vector3 endPt = new Vector3(4497.634f, 94.170654f, 17712.672f);
         Vector3 WallStart = new Vector3(4412.0195f, 59.477183f, 17394.703f);
         Vector3 WallTarget = new Vector3(4414.3f, 58.2188f, 17341.8f);
         Vector3 WallTarget2 = new Vector3(4409.1f, 57.6562f, 17423.6f);
@@ -44,11 +44,11 @@ public unsafe partial class DetourWrapper
         Vector3 rockTarget = new Vector3(4463.85f, 57.6562f, 17402.4f);
         Vector3 rockTarget2 = new Vector3(4473.99f, 57.6562f, 17441f);
         Vector3 centerPoint = new Vector3(4473.99f, 57.6562f, 17441f);
-        float radius = 20.0f;
+        float radius = 40.0f;
         Vector3 rndPoint;
 
 
-        float range = 60.0f;
+        float range = 100.0f;
 
         void* detourPtr = DetourWrapper.allocDetour();
         if (detourPtr == null)
@@ -69,7 +69,7 @@ public unsafe partial class DetourWrapper
             {
                 Console.WriteLine("Load successful!");
 
-                uint los = DetourWrapper.check_los(detourPtr, &rockStart, &rockTarget2, &range);
+                uint los = DetourWrapper.check_los(detourPtr, &startPt, &endPt, &range);
                 if (los == 0)
                 {
                     Console.WriteLine("Invalid point!");
@@ -90,15 +90,15 @@ public unsafe partial class DetourWrapper
                     Console.WriteLine("LoS Success!");
                 }
 
-
-                Span<float> strPathArray = stackalloc float[768];                
+                Span<float> strPathArray = stackalloc float[768];
                 fixed (float* strPathPtr = strPathArray)
-                    
+
                 {
                     uint pathCount = DetourWrapper.find_path(detourPtr, &startPt, &endPt, strPathPtr);
 
                     if (pathCount > 0)
                     {
+                        Console.WriteLine($"find_path succeeded. Path points found: {pathCount}");
                         List<Vector3> pathPoints = new List<Vector3>();
                         for (int i = 0; i < pathCount * 3; i += 3)
                         {
@@ -117,15 +117,16 @@ public unsafe partial class DetourWrapper
                     }
                 }
 
-                Span<float> strPathArray2 = stackalloc float[768];
-                fixed (float* strPathPtr = strPathArray2)
+
+                Span<float> strPathArray2 = stackalloc float[6144];
+                fixed (float* smoothPathPtr = strPathArray2)
 
                 {
-                    uint pathCount = DetourWrapper.random_roam(detourPtr, &startPt, strPathPtr);
+                    uint pathCount = DetourWrapper.find_smoothPath(detourPtr, &startPt, &endPt, smoothPathPtr);
 
                     if (pathCount > 0)
                     {
-                        Console.WriteLine("Random Roam Path found!");
+                        Console.WriteLine($"refine_path succeeded. points found: {pathCount}");
                         List<Vector3> pathPoints = new List<Vector3>();
                         for (int i = 0; i < pathCount * 3; i += 3)
                         {
@@ -141,28 +142,6 @@ public unsafe partial class DetourWrapper
                     else
                     {
                         Console.WriteLine("No path found.");
-                    }
-                }
-
-                Span<float> rndPointArray = stackalloc float[3];
-                int numberOfRandomPoints = 10;
-
-                for (int i = 0; i < numberOfRandomPoints; i++)
-                {
-                    fixed (float* rndPointPtr = rndPointArray)
-                    {
-                        uint pointFound = DetourWrapper.random_point(detourPtr, (float*)&centerPoint, radius, rndPointPtr);
-
-                        if (pointFound > 0)
-                        {
-                            Console.WriteLine($"Random Point {i + 1} found!");
-                            Vector3 randomPoint = new Vector3(rndPointArray[0], rndPointArray[1], rndPointArray[2]);
-                            Console.WriteLine($"Random Point {i + 1}: X={randomPoint.X} Y={randomPoint.Y} Z={randomPoint.Z}");
-                        }
-                        else
-                        {
-                            Console.WriteLine($"No random point found for iteration {i + 1}.");
-                        }
                     }
                 }
             }
