@@ -46,6 +46,11 @@ public unsafe partial class DetourWrapper
     // Add future functions...
     static unsafe void Main()
     {
+        if (NullEdgeTests.TryRun(Environment.GetCommandLineArgs()))
+        {
+            return;
+        }
+
         Vector3 startPt = new Vector3(25118, 51.27f, 14158);
         Vector3 endPt = new Vector3(25120, 51.27f, 14328);
         //Vector3 WallStart = new Vector3(4412.0195f, 59.477183f, 17394.703f);
